@@ -17,7 +17,7 @@
     $smarty->assign('years',$years);
     $smarty->assign('regions',$regions);
     $smarty->assign('variety',$varieties);
-    $smarty->debugging=true;
+    $smarty->debugging=false;
     
     $smarty->display('index.tpl');
 

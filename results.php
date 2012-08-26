@@ -26,44 +26,48 @@ function process_form($form_array) {
     );
 
     $query_terms = "";
-
+    $having_terms = "";
     foreach ($form_array as $key => $value) {
 
         if (array_key_exists($key, $fields_array) && $value != "") {
 
-            $query_terms .=" AND ";
+            
+            
             switch ($key) {
-                case 'year_min': $query_terms.='wine.year >= ' . $value;
+                case 'year_min': $query_terms.=' AND wine.year >= ' . $value;
                     break;
 
-                case 'year_max': $query_terms.='wine.year <= ' . $value;
+                case 'year_max': $query_terms.=' AND wine.year <= ' . $value;
                     break;
 
-                case 'max_price': $query_terms.='items.price <=' . $value;
+                case 'max_price': $query_terms.=' AND inventory.cost <=' . $value;
                     break;
 
-                case 'min_price':$query_terms.='items.price >=' . $value;
+                case 'min_price':$query_terms.=' AND inventory.cost >=' . $value;
                     break;
 
-                case 'stock':$query_terms.='inventory.on_hand >=' . $value;
+                case 'stock':$query_terms.=' AND inventory.on_hand >=' . $value;
                     break;
 
-                case 'order':$query_terms.='items.qty >=' . $value;
+                case 'order':$having_terms.='|HAVING SUM(items.qty) >=' . $value.";";
                     break;
 
-                case 'wine_name': $query_terms.='wine.wine_name LIKE \'%' . $value . '%\'';
+                case 'wine_name': $query_terms.=' AND wine.wine_name LIKE \'%' . $value . '%\'';
                     break;
 
-                case 'winery_name': $query_terms.='winery.winery_name LIKE \'%' . $value . '%\'';
+                case 'winery_name': $query_terms.=' AND winery.winery_name LIKE \'%' . $value . '%\'';
                     break;
 
-                case 'region_name': $query_terms.='region.region_name LIKE \'%' . $value . '%\'';
+                case 'region_name': $query_terms.=' AND region.region_name LIKE \'%' . $value . '%\'';
                     break;
 
-                case 'variety': $query_terms.='grape_variety.variety LIKE \'%' . $value. '%\'';
+                case 'variety': $query_terms.=' AND grape_variety.variety LIKE \'%' . $value. '%\'';
                     break;
             }
         }
+    }
+    if($having_terms!=""){
+        $query_terms.=$having_terms;
     }
     return $query_terms;
 }
@@ -71,14 +75,14 @@ function process_form($form_array) {
 function get_wine_info($search_params) {
     $conn = connect();
 
+    $params=explode("|", $search_params);
     $sql = "SELECT SUM(items.qty) as total_qty, SUM(items.price) as total_revenue, wine.wine_name,inventory.cost, items.price, items.qty, inventory.on_hand, 
         winery.winery_name, region.region_name,wine.year, grape_variety.variety   
     FROM wine,inventory,items, winery, region,grape_variety, wine_variety
     WHERE (wine.wine_id = items.wine_id AND wine.wine_id = inventory.wine_id 
     AND winery.winery_id = wine.winery_id AND winery.region_id = region.region_id AND wine.wine_id=wine_variety.wine_id 
     AND grape_variety.variety_id=wine_variety.variety_id" . 
-      $search_params . ") GROUP BY wine.wine_id";
-    
+      $params[0] . ") GROUP BY wine.wine_id ".$params[1];
     
     $res = $conn->query($sql);
     return $res;    
@@ -89,10 +93,14 @@ function get_wine_info($search_params) {
 ?>
 
             
-<?php get_wine_info(process_form($_POST));
+<?php 
 
 $wines = get_wine_info(process_form($_POST));
-    $smarty->assign('res',$wines);
+if($wines==FALSE){    
+    $wines=0;
+}
+    
+$smarty->assign('res',$wines);
     $smarty->debugging=true;    
     $smarty->display('results.tpl');
 

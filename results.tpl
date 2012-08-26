@@ -1,3 +1,4 @@
+{include file="header.tpl"}
 
 <div class="main-container">
     <div class="main-inner">
@@ -16,22 +17,27 @@
             </tr>
         </thead>
         <tbody>
-           {foreach $res as $r}
-	    <tr>
-		<td>$r@iteration</td>
-	        <td>$r.wine_name</td>
-		<td><$r.variety/td>
-		<td>$r.year</td>
-		<td><$r.winery_name/td>
-		<td>$r.region_name</td>
-		<td>$r.cost</td>
-		<td>$r.on_hand</td>
-		<td>$r.total_qty</td>
-		<td>$r.total_revenue</td>
-	    </tr>
+           {if $res != 0}
+            {foreach $res as $r}
+                <tr>
+                    <td>{$r@iteration}</td>
+                    <td>{$r.wine_name}</td>
+                    <td>{$r.variety}</td>
+                    <td>{$r.year}</td>
+                    <td>{$r.winery_name}</td>
+                    <td>{$r.region_name}</td>
+                    <td>{$r.cost}</td>
+                    <td>{$r.on_hand}</td>
+                    <td>{$r.total_qty}</td>
+                    <td>{$r.total_revenue}</td>
+                </tr>
            {/foreach}
+           {else}
+            <tr><td>No Results Found</td></tr>
+           {/if}
 	</tbody>
 </table>	
   </div>
     </div>
 </div>
+{include file="footer.tpl"}

@@ -3,7 +3,7 @@
     <div class="main-inner">
 
         <div class="search-container">
-            <form method="POST" action="results.php" id="wine_form">
+            <form onsubmit="return validate_form();" method="POST" action="results.php" id="wine_form">
                 <table>
                     <tr>
                         <td>Wine</td>

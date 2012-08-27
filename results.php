@@ -96,12 +96,15 @@ function get_wine_info($search_params) {
 <?php 
 
 $wines = get_wine_info(process_form($_POST));
-if($wines==FALSE){    
+$rows = $wines->fetchAll();
+
+
+if(count($rows)==0){    
     $wines=0;
 }
     
-$smarty->assign('res',$wines);
-    $smarty->debugging=true;    
+$smarty->assign('res',$rows);
+    $smarty->debugging=false;    
     $smarty->display('results.tpl');
 
 ?>
